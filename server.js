@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 
 const connectDB = require("./config/db");
+const authRoutes=require("./routes/authRoutes");
 
 const app = express();
 
@@ -14,6 +15,9 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/api/auth",authRoutes);
+
+// Routes
 
 // Test Route
 app.get("/", (req, res) => {
@@ -21,6 +25,14 @@ app.get("/", (req, res) => {
     success: true,
     message: "API Running Successfully",
   });
+});
+
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: "Route not found"
+    });
 });
 
 // Start Server
