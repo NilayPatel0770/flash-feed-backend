@@ -11,6 +11,10 @@ const {
   likeArticle,
   unlikeArticle,
   getLikedArticles,
+  saveReadingHistory,
+  getReadingHistory,
+  incrementViews,
+  getTrendingArticles
 } = require("../services/newsService");
 
 const addArticle = async (req, res) => {
@@ -75,7 +79,8 @@ const getArticle = async (req, res) => {
       });
     }
 
-    const article = await getArticleById(req.params.id);
+    // const article = await getArticleById(req.params.id);
+    const article = await incrementViews(req.params.id);
 
     if (!article) {
       return res.status(404).json({
@@ -236,19 +241,55 @@ const addLike = async (req, res) => {
 };
 
 const removeLike = async (req, res) => {
+  try {
+    await unlikeArticle(req.user._id, req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Like removed successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const fetchLikedArticles = async (req, res) => {
+  try {
+    const articles = await getLikedArticles(req.user._id);
+
+    res.status(200).json({
+      success: true,
+      count: articles.length,
+      data: articles,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const addReadingHistory = async (req, res) => {
 
     try {
 
-        await unlikeArticle(req.user._id, req.params.id);
+        await saveReadingHistory(
+            req.user._id,
+            req.params.id
+        );
 
         res.status(200).json({
             success: true,
-            message: "Like removed successfully"
+            message: "Reading history updated"
         });
 
     } catch (error) {
 
-        res.status(400).json({
+        res.status(500).json({
             success: false,
             message: error.message
         });
@@ -257,24 +298,62 @@ const removeLike = async (req, res) => {
 
 };
 
-const fetchLikedArticles = async (req, res) => {
+const fetchReadingHistory = async (req, res) => {
 
     try {
 
-        const articles =
-            await getLikedArticles(req.user._id);
+        const history =
+            await getReadingHistory(req.user._id);
 
         res.status(200).json({
+
             success: true,
-            count: articles.length,
-            data: articles
+
+            count: history.length,
+
+            data: history
+
         });
 
     } catch (error) {
 
         res.status(500).json({
+
             success: false,
+
             message: error.message
+
+        });
+
+    }
+
+};
+
+const getTrendingNews = async (req, res) => {
+
+    try {
+
+        const news =
+            await getTrendingArticles();
+
+        res.status(200).json({
+
+            success: true,
+
+            count: news.length,
+
+            data: news
+
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+
+            message: error.message
+
         });
 
     }
@@ -292,5 +371,8 @@ module.exports = {
   fetchBookmarks,
   addLike,
   removeLike,
-  fetchLikedArticles
+  fetchLikedArticles,
+  addReadingHistory,
+  fetchReadingHistory,
+  getTrendingNews
 };

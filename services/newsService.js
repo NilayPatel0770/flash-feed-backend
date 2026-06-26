@@ -170,6 +170,63 @@ const getLikedArticles = async (userId) => {
   return user.likedArticles;
 };
 
+const saveReadingHistory = async (userId, articleId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const alreadyExists = user.readingHistory.find(
+    (item) => item.article.toString() === articleId,
+  );
+
+  if (!alreadyExists) {
+    user.readingHistory.push({
+      article: articleId,
+    });
+
+    await user.save();
+  }
+
+  return user;
+};
+
+const getReadingHistory = async (userId) => {
+  const user = await User.findById(userId).populate("readingHistory.article");
+
+  return user.readingHistory;
+};
+
+const incrementViews = async (articleId) => {
+
+    const article = await Article.findByIdAndUpdate(
+        articleId,
+        {
+            $inc: {
+                views: 1
+            }
+        },
+        {
+            new: true
+        }
+    );
+
+    return article;
+
+};
+
+const getTrendingArticles = async () => {
+
+    return await Article.find()
+        .sort({
+            views: -1,
+            likes: -1
+        })
+        .limit(10);
+
+};
+
 module.exports = {
   createArticle,
   getAllArticles,
@@ -182,4 +239,8 @@ module.exports = {
   likeArticle,
   unlikeArticle,
   getLikedArticles,
+  saveReadingHistory,
+  getReadingHistory,
+  incrementViews,
+  getTrendingArticles
 };

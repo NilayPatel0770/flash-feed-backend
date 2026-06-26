@@ -31,11 +31,25 @@ const userSchema = new mongoose.Schema(
         ref: "Article",
       },
     ],
-    
+
     likedArticles: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Article",
+      },
+    ],
+
+    readingHistory: [
+      {
+        article: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Article",
+        },
+
+        viewedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
 

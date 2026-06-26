@@ -13,11 +13,18 @@ const {
   addLike,
   removeLike,
   fetchLikedArticles,
+  addReadingHistory,
+  fetchReadingHistory,
+  getTrendingNews
 } = require("../controllers/newsController");
 
 router.post("/", addArticle);
 router.get("/", getArticles);
 router.get("/liked", protect, fetchLikedArticles);
+router.get("/trending", getTrendingNews);
+
+router.post("/:id/history", protect, addReadingHistory);
+router.get("/history", protect, fetchReadingHistory);
 
 router.post("/:id/like", protect, addLike);
 router.delete("/:id/like", protect, removeLike);
