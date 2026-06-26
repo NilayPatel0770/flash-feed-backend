@@ -48,16 +48,27 @@ const articleSchema = new mongoose.Schema(
       default: Date.now,
     },
 
-    // AI Fields 
+    // AI Fields
     summary: {
       type: String,
       default: "",
+    },
+
+    keywords: {
+      type: [String],
+      default: [],
     },
 
     embedding: {
       type: [Number],
       default: [],
     },
+
+    sentiment: {
+    type: String,
+    enum: ["Positive", "Negative", "Neutral"],
+    default: "Neutral",
+},
 
     // Statistics
     views: {
@@ -77,7 +88,7 @@ const articleSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Article", articleSchema);

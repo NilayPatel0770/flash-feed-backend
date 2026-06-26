@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/NilayPatel0770/flash-feed-backend#readme",
   "dependencies": {
+    "@google/genai": "^2.10.0",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
