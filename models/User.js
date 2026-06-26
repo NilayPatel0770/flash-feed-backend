@@ -31,6 +31,13 @@ const userSchema = new mongoose.Schema(
         ref: "Article",
       },
     ],
+    
+    likedArticles: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Article",
+      },
+    ],
 
     role: {
       type: String,
@@ -40,7 +47,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("User", userSchema);
