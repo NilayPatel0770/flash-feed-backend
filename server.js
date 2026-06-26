@@ -7,7 +7,9 @@ const connectDB = require("./config/db");
 const authRoutes=require("./routes/authRoutes");
 const newsRoutes = require("./routes/newsRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
-
+const uploadRoutes =
+require("./routes/uploadRoutes");
+const path = require("path");
 const app = express();
 
 // Connect Database
@@ -20,6 +22,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth",authRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use(
+    "/uploads",
+    express.static(path.join(__dirname, "uploads"))
+);
 
 // Routes
 
