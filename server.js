@@ -10,6 +10,8 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const uploadRoutes =
 require("./routes/uploadRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const recommendationRoutes = require("./routes/recommendationRoutes");
+const likeRoutes = require("./routes/likeRoutes");
 const path = require("path");
 const app = express();
 
@@ -22,7 +24,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth",authRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/likes", likeRoutes);
 app.use(
     "/uploads",
     express.static(path.join(__dirname, "uploads"))

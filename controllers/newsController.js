@@ -360,6 +360,31 @@ const getTrendingNews = async (req, res) => {
 
 };
 
+const getNewsById = async (req, res) => {
+
+    const article = await Article.findById(req.params.id);
+
+    if (!article) {
+        return res.status(404).json({
+            success: false,
+            message: "Article not found"
+        });
+    }
+
+    await User.findByIdAndUpdate(
+        req.user.id,
+        {
+            $push: {
+                readingHistory: {
+                    article: article._id
+                }
+            }
+        }
+    );
+
+    res.json(article);
+};
+
 module.exports = {
   addArticle,
   getArticles,
@@ -374,5 +399,6 @@ module.exports = {
   fetchLikedArticles,
   addReadingHistory,
   fetchReadingHistory,
-  getTrendingNews
+  getTrendingNews,
+  getNewsById
 };

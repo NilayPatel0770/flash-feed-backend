@@ -50,9 +50,9 @@ const articleSchema = new mongoose.Schema(
 
     // AI Fields
     summary: {
-      type: String,
-      default: "",
-    },
+    type: [String],
+    default: []
+},
 
     keywords: {
       type: [String],
