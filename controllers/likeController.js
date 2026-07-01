@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Article = require("../models/Article");
+const { updateUserInterest } = require("../services/userInterestService");
 
 // Like Article
 const likeArticle = async (req, res) => {
@@ -42,6 +43,7 @@ const likeArticle = async (req, res) => {
 
     article.likes += 1;
     await article.save();
+    await updateUserInterest(req.user.id, article.category);
 
     res.status(200).json({
       success: true,

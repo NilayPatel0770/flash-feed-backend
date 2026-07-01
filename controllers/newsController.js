@@ -14,8 +14,11 @@ const {
   saveReadingHistory,
   getReadingHistory,
   incrementViews,
-  getTrendingArticles
+  getTrendingArticles,
 } = require("../services/newsService");
+const User = require("../models/User");
+const Article = require("../models/Article");
+const { updateUserInterest } = require("../services/userInterestService");
 
 const addArticle = async (req, res) => {
   try {
@@ -274,115 +277,126 @@ const fetchLikedArticles = async (req, res) => {
 };
 
 const addReadingHistory = async (req, res) => {
+  try {
+    await saveReadingHistory(req.user._id, req.params.id);
 
-    try {
-
-        await saveReadingHistory(
-            req.user._id,
-            req.params.id
-        );
-
-        res.status(200).json({
-            success: true,
-            message: "Reading history updated"
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
-    }
-
+    res.status(200).json({
+      success: true,
+      message: "Reading history updated",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
 const fetchReadingHistory = async (req, res) => {
+  try {
+    const history = await getReadingHistory(req.user._id);
 
-    try {
+    res.status(200).json({
+      success: true,
 
-        const history =
-            await getReadingHistory(req.user._id);
+      count: history.length,
 
-        res.status(200).json({
+      data: history,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
 
-            success: true,
-
-            count: history.length,
-
-            data: history
-
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: error.message
-
-        });
-
-    }
-
+      message: error.message,
+    });
+  }
 };
 
 const getTrendingNews = async (req, res) => {
+  try {
+    const news = await getTrendingArticles();
 
-    try {
+    res.status(200).json({
+      success: true,
 
-        const news =
-            await getTrendingArticles();
+      count: news.length,
 
-        res.status(200).json({
+      data: news,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
 
-            success: true,
-
-            count: news.length,
-
-            data: news
-
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: error.message
-
-        });
-
-    }
-
+      message: error.message,
+    });
+  }
 };
 
 const getNewsById = async (req, res) => {
-
+  try {
     const article = await Article.findById(req.params.id);
-
+    console.log("========== GET NEWS ==========");
+    console.log("req.user:", req.user);
+    console.log("==============================");
     if (!article) {
-        return res.status(404).json({
-            success: false,
-            message: "Article not found"
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
     }
 
-    await User.findByIdAndUpdate(
-        req.user.id,
-        {
-            $push: {
-                readingHistory: {
-                    article: article._id
-                }
-            }
-        }
-    );
+    // Increase view count
+    article.views += 1;
+    await article.save();
 
-    res.json(article);
+    // Update reading history only for logged-in users
+    if (req.user) {
+      console.log("User authenticated:", req.user.id);
+      const user = await User.findById(req.user.id);
+console.log("User found:", !!user);
+
+if (user) {
+    console.log("Reading History Before:", user.readingHistory);
+}
+      if (user) {
+        if (!user.readingHistory) {
+          user.readingHistory = [];
+        }
+
+        const existing = user.readingHistory.find(
+          (item) => item.article.toString() === article._id.toString(),
+        );
+
+        if (existing) {
+          // Update last viewed time
+          existing.viewedAt = new Date();
+        } else {
+          // Add new history entry
+          user.readingHistory.push({
+            article: article._id,
+            viewedAt: new Date(),
+          });
+        }
+
+        // Save preferred category
+        await updateUserInterest(req.user.id, article.category);
+
+        await user.save();
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      article,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
 module.exports = {
@@ -400,5 +414,5 @@ module.exports = {
   addReadingHistory,
   fetchReadingHistory,
   getTrendingNews,
-  getNewsById
+  getNewsById,
 };

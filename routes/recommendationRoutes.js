@@ -6,6 +6,6 @@ const {
     getRecommendations
 } = require("../controllers/recommendationController");
 
-router.get("/:articleId", getRecommendations);
+router.get("/article/:articleId", getRecommendations);
 
 module.exports = router;

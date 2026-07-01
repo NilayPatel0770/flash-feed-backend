@@ -52,10 +52,17 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
-    preferredCategories: {
-      type: [String],
-      default: [],
-    },
+    preferredCategories: [
+      {
+        category: {
+          type: String,
+        },
+        score: {
+          type: Number,
+          default: 1,
+        },
+      },
+    ],
     role: {
       type: String,
       enum: ["user", "admin"],

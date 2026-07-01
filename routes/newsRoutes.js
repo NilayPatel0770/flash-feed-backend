@@ -15,7 +15,8 @@ const {
   fetchLikedArticles,
   addReadingHistory,
   fetchReadingHistory,
-  getTrendingNews
+  getTrendingNews,
+  getNewsById
 } = require("../controllers/newsController");
 
 router.post("/", addArticle);
@@ -33,7 +34,7 @@ router.post("/:id/bookmark", protect, addBookmark);
 router.delete("/:id/bookmark", protect, deleteBookmark);
 router.get("/bookmarks", protect, fetchBookmarks);
 
-router.get("/:id", getArticle);
+router.get("/:id", protect, getNewsById);
 router.put("/:id", editArticle);
 router.delete("/:id", removeArticle);
 
