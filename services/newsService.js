@@ -51,7 +51,7 @@ const getAllArticles = async (query) => {
   const total = await Article.countDocuments(filter);
 
   const articles = await Article.find(filter)
-    .sort({ createdAt: -1 })
+    .sort({ publishedAt : -1 })
     .skip(skip)
     .limit(limit);
 
