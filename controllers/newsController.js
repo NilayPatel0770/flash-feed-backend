@@ -173,17 +173,16 @@ const removeArticle = async (req, res) => {
 
 const addBookmark = async (req, res) => {
   try {
-    await bookmarkArticle(req.user._id, req.params.id);
+    const article = await bookmarkArticle(req.user._id, req.params.id);
 
     res.status(200).json({
       success: true,
-
       message: "Article bookmarked",
+      data: article,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-
       message: error.message,
     });
   }

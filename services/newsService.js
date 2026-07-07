@@ -16,8 +16,12 @@ const getAllArticles = async (query) => {
   const filter = {};
 
   // Category Filter
+  // Category Filter
   if (query.category) {
-    filter.category = query.category;
+    filter.category = {
+      $regex: `^${query.category}$`,
+      $options: "i",
+    };
   }
 
   // Search
@@ -84,22 +88,34 @@ const deleteArticle = async (id) => {
 
 const bookmarkArticle = async (userId, articleId) => {
   const user = await User.findById(userId);
+  const article = await Article.findById(articleId);
 
-  if (!user) {
-    throw new Error("User not found");
+  if (!user || !article) {
+    throw new Error("User or Article not found");
   }
 
-  const alreadyBookmarked = user.bookmarks.includes(articleId);
-
-  if (alreadyBookmarked) {
+  if (user.bookmarks.includes(articleId)) {
     throw new Error("Article already bookmarked");
   }
 
+  console.log("========== BOOKMARK DEBUG ==========");
+  console.log("Before:", article.bookmarks);
+
   user.bookmarks.push(articleId);
 
-  await user.save();
+  article.bookmarks += 1;
 
-  return user;
+  console.log("After Increment:", article.bookmarks);
+
+  await user.save();
+  await article.save();
+
+  const updatedArticle = await Article.findById(articleId);
+
+  console.log("Saved In Mongo:", updatedArticle.bookmarks);
+  console.log("===================================");
+
+  return updatedArticle;
 };
 
 const removeBookmark = async (userId, articleId) => {
@@ -109,11 +125,16 @@ const removeBookmark = async (userId, articleId) => {
     throw new Error("User not found");
   }
 
+  const article = await Article.findById(articleId);
+
   user.bookmarks = user.bookmarks.filter((id) => id.toString() !== articleId);
 
-  await user.save();
+  article.bookmarks = Math.max(article.bookmarks - 1, 0);
 
-  return user;
+  await user.save();
+  await article.save();
+
+  return article;
 };
 
 const getBookmarks = async (userId) => {
@@ -199,32 +220,67 @@ const getReadingHistory = async (userId) => {
 };
 
 const incrementViews = async (articleId) => {
+  const article = await Article.findByIdAndUpdate(
+    articleId,
+    {
+      $inc: {
+        views: 1,
+      },
+    },
+    {
+      new: true,
+    },
+  );
 
-    const article = await Article.findByIdAndUpdate(
-        articleId,
-        {
-            $inc: {
-                views: 1
-            }
-        },
-        {
-            new: true
-        }
-    );
-
-    return article;
-
+  return article;
 };
 
+// const getTrendingArticles = async () => {
+//   const filter = {};
+
+// if (query.category) {
+//     filter.category = query.category;
+// }
+
+// if (query.search) {
+//     filter.$or = [
+//         {
+//             title: {
+//                 $regex: query.search,
+//                 $options: "i"
+//             }
+//         },
+//         {
+//             description: {
+//                 $regex: query.search,
+//                 $options: "i"
+//             }
+//         },
+//         {
+//             keywords: {
+//                 $in: [new RegExp(query.search, "i")]
+//             }
+//         }
+//     ];
+// }
+//     return await Article.find()
+//         .sort({
+//             views: -1,
+//             likes: -1
+//         })
+//         .limit(10);
+
+// };
 const getTrendingArticles = async () => {
+  return await Article.find()
 
-    return await Article.find()
-        .sort({
-            views: -1,
-            likes: -1
-        })
-        .limit(10);
+    .sort({
+      views: -1,
+      likes: -1,
+      publishedAt: -1,
+    })
 
+    .limit(20);
 };
 
 module.exports = {
@@ -242,5 +298,5 @@ module.exports = {
   saveReadingHistory,
   getReadingHistory,
   incrementViews,
-  getTrendingArticles
+  getTrendingArticles,
 };

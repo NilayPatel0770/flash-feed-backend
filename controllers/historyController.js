@@ -59,27 +59,19 @@ const addToHistory = async (req, res) => {
 
 
 // Get Reading History
-const getReadingHistory = async (req, res) => {
+const getReadingHistory = async (userId) => {
 
-    try {
+    const user = await User.findById(userId)
+        .populate("readingHistory.article");
 
-        const user = await User.findById(req.user.id)
-            .populate("readingHistory.article");
+    user.readingHistory =
+        user.readingHistory.filter(
+            item => item.article
+        );
 
-        res.status(200).json({
-            success: true,
-            count: user.readingHistory.length,
-            history: user.readingHistory
-        });
+    await user.save();
 
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
-    }
+    return user.readingHistory;
 
 };
 

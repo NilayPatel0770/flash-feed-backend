@@ -4,41 +4,20 @@ const Article = require("../models/Article");
 // Add Bookmark
 const addBookmark = async (req, res) => {
   try {
-    const { articleId } = req.params;
+    console.log("BOOKMARK API HIT");
 
-    const user = await User.findById(req.user.id);
+    const article = await bookmarkArticle(req.user._id, req.params.id);
 
-    const article = await Article.findById(articleId);
-
-    if (!user || !article) {
-      return res.status(404).json({
-        success: false,
-        message: "User or Article not found",
-      });
-    }
-
-    const exists = user.bookmarks.some((id) => id.toString() === articleId);
-
-    if (exists) {
-      return res.status(400).json({
-        success: false,
-        message: "Article already bookmarked",
-      });
-    }
-
-    user.bookmarks.push(articleId);
-    await user.save();
-
-    article.bookmarks += 1;
-    await article.save();
-    await updateUserInterest(req.user.id, article.category);
+    console.log("Returned bookmarks:", article.bookmarks);
 
     res.status(200).json({
       success: true,
-      message: "Bookmark added successfully",
+      data: article,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+
+    res.status(400).json({
       success: false,
       message: error.message,
     });
